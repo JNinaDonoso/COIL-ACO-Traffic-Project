@@ -16,7 +16,7 @@ def compute_edge_cost(
 
     - distance: cost = distance
     - time:     cost = time
-    - traffic:  cost = distance * traffic
+    - traffic:  cost = distance * (1+ traffic)
     - mixed:    cost = alpha1 * distance + alpha2 * time + alpha3 * traffic
     """
     if heuristic == "distance":
@@ -24,7 +24,7 @@ def compute_edge_cost(
     elif heuristic == "time":
         return attrs.time
     elif heuristic == "traffic":
-        return attrs.distance * attrs.traffic
+        return attrs.distance * (1 + attrs.traffic) # 1+traffic because if not, streets without traffic would have no cost
     elif heuristic == "mixed":
         return (
             alpha1 * attrs.distance

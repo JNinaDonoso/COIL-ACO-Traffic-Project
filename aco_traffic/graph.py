@@ -8,7 +8,7 @@ Node = Tuple[int, int]
 class EdgeAttributes:
     distance: float      # physical length of the street
     traffic: float       # traffic level (probably a coefficient from 0 to 1? we´ll see later)
-    time: float     # time used to travel the street
+    time: float          # time used to travel the street
 
 class GridGraph:
     """
