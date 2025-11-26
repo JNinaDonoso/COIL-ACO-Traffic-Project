@@ -56,8 +56,8 @@ class GridGraph:
                                 time= self.default_distance,  # assuming velocity = 1 initially
                             )
 
-                        self.adj[node][neighbour] = attrs
-                        self.adj[neighbour][node] = attrs
+                            self.adj[node][neighbour] = attrs
+                            self.adj[neighbour][node] = attrs
 
     def nodes(self) -> List[Node]:
         """Returns a list of every node on the graph"""

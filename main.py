@@ -1,37 +1,41 @@
 from aco_traffic.graph import GridGraph
-from aco_traffic.ant import SimpleAnt
-from aco_traffic.path_utils import compute_path_cost
+from aco_traffic.aco_solver import AcoSolver
 
 
 def main():
-    grid = GridGraph(rows=3, cols=3, default_distance=1.0)
-    print("Graph created:", grid)
+    grid = GridGraph(rows=4, cols=4, default_distance=1.0)
 
-    grid.update_edge((0, 0), (0, 1), distance=3.0) # longer street
-    grid.update_edge((0, 1), (0, 2), traffic=0.95) # very high traffic street
+    grid.update_edge((0, 0), (0, 1), distance=7.0)
+    grid.update_edge((0, 1), (0, 2), distance=7.0)
 
     start = (0, 0)
-    waypoints = [(0, 2), (2, 2)]
-    end = (2, 0)
+    waypoints = [(0, 3), (2, 2)]
+    end = (0, 0)
 
-    ant = SimpleAnt(
+    solver = AcoSolver(
         graph=grid,
         start=start,
         waypoints=waypoints,
         end=end,
-        heuristic="traffic",
-        max_steps=50,
+        heuristic="distance",
+        num_ants=40,
+        num_iterations=50,
+        num_elites=5,
+        alpha=1.0,
+        beta=4.0,
+        rho=0.2,
+        Q=1.0,
+        max_steps_per_ant=50,
+        alpha1=1.0,
+        alpha2=1.0,
+        alpha3=1.0,
     )
 
-    ant.walk()
+    solver.run(verbose=True)
 
-    print("\nAnt finished walk:")
-    print("  Path:", ant.path)
-    print("  Visited waypoints:", ant.visited_waypoints)
-    print("  Finished condition:", ant.finished)
-
-    total_cost = compute_path_cost(grid, ant.path, heuristic="traffic")
-    print(f"  Total path cost (traffic heuristic): {total_cost:.2f}")
+    print("\n=== ACO RESULT ===")
+    print("Best path found:", solver.best_path)
+    print("Best cost:", solver.best_cost)
 
 
 if __name__ == "__main__":

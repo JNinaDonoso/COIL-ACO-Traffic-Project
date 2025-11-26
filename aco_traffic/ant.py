@@ -55,8 +55,8 @@ class SimpleAnt:
             best_score: float = float("inf")
 
             for nb, attrs in neighbours.items():
-            #    if len(self.path) >= 2 and nb == self.path[-2] and len(neighbours) > 1:
-            #        continue
+                if len(self.path) >= 2 and nb == self.path[-2] and len(neighbours) > 1:
+                    continue
 
                 edge_cost = compute_edge_cost(attrs, heuristic=self.heuristic)
                 dir_cost = manhattan_distance(nb, target)
@@ -85,3 +85,93 @@ class SimpleAnt:
             return self.end
 
         return min(unvisited, key=lambda wp: manhattan_distance(self.path[-1], wp))
+
+
+from typing import TYPE_CHECKING
+import random
+if TYPE_CHECKING:
+    from .aco_solver import AcoSolver # Avoids circular import of AcoSolver and ants
+
+@dataclass
+class AcoAnt:
+    """
+    More complex ant used in the ACO algorithm
+    """
+
+    solver: "AcoSolver"
+    max_steps: int = 100
+
+    path: List[Node] = field(default_factory=list)
+    visited_waypoints: Set[Node] = field(default_factory=set)
+    finished: bool = False
+
+    def construct_solution(self) -> None:
+        """
+        Build a path using a probabilistic rule based on pheromone and cost
+        """
+        graph = self.solver.graph
+        start = self.solver.start
+        end = self.solver.end
+        waypoints = self.solver.waypoints
+
+        self.path = [start]
+        self.visited_waypoints = set()
+        self.finished = False
+
+        current = start
+        if current in waypoints:
+            self.visited_waypoints.add(current)
+
+        for _ in range(self.max_steps):
+            if current == end and self._all_waypoints_visited(waypoints):
+                self.finished = True
+                break
+
+            neighbours = graph.neighbours(current)
+            if not neighbours:
+                break
+
+            candidates = []
+            attractiveness = []
+
+            for nb, attrs in neighbours.items():
+            #    if len(self.path) >= 2 and nb == self.path[-2] and len(neighbours) > 1:
+            #        continue
+
+                cost_ij = compute_edge_cost(
+                    attrs,
+                    heuristic=self.solver.heuristic,
+                    alpha1=self.solver.alpha1,
+                    alpha2=self.solver.alpha2,
+                    alpha3=self.solver.alpha3,
+                )
+
+                eta = 1.0 / cost_ij
+                tau = self.solver.get_pheromone(current, nb)
+                value = (tau ** self.solver.alpha) * (eta ** self.solver.beta)
+
+                candidates.append(nb)
+                attractiveness.append(value)
+
+            if not candidates:
+                break
+
+            total = sum(attractiveness)
+            r = random.random() * total
+            cumulative = 0.0
+            chosen_index = 0
+            for i, value in enumerate(attractiveness):
+                cumulative += value
+                if r <= cumulative:
+                    chosen_index = i
+                    break
+
+            next_node = candidates[chosen_index]
+            current = next_node
+            self.path.append(current)
+
+            if current in waypoints:
+                self.visited_waypoints.add(current)
+
+    def _all_waypoints_visited(self, waypoints: List[Node]) -> bool:
+        return all(wp in self.visited_waypoints for wp in waypoints)
