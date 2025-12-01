@@ -135,8 +135,8 @@ class AcoAnt:
             attractiveness = []
 
             for nb, attrs in neighbours.items():
-            #    if len(self.path) >= 2 and nb == self.path[-2] and len(neighbours) > 1:
-            #        continue
+                if len(self.path) >= 3 and nb == self.path[-2] and self.path[-1] == self.path[-3] and len(neighbours) > 1:
+                    continue
 
                 cost_ij = compute_edge_cost(
                     attrs,

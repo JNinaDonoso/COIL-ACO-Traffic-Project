@@ -37,6 +37,7 @@ class AcoSolver:
     alpha2: float = 1.0
     alpha3: float = 1.0
 
+    elitist_weight: float = 1.0
 
     pheromone: Dict[EdgeKey, float] = field(init=False, default_factory=dict)
     best_path: Optional[List[Node]] = field(init=False, default=None)
@@ -81,7 +82,7 @@ class AcoSolver:
         for edge in list(self.pheromone.keys()):
             self.pheromone[edge] *= factor
 
-    def deposit_pheromone_on_path(self, path: List[Node]) -> None:
+    def deposit_pheromone_on_path(self, path: List[Node], weight: float = 1.0) -> None:
         """
         Pheromone deposition on a path.
         """
@@ -99,7 +100,7 @@ class AcoSolver:
         if cost <= 0:
             return
 
-        delta_tau = self.Q / cost
+        delta_tau = weight * (self.Q / cost)
 
         for u, v in zip(path[:-1], path[1:]):
             current_tau = self.get_pheromone(u, v)
@@ -135,8 +136,10 @@ class AcoSolver:
             valid_ants = [ant for ant in ants if ant.finished and len(ant.path) >= 2]
 
             if not valid_ants:
+                if self.best_path is not None and self.elitist_weight > 0.0: # Elitist reinforcement for global best
+                    self.deposit_pheromone_on_path(self.best_path, weight=self.elitist_weight)
                 if verbose:
-                    print(f"Iteration {iteration}: no valid solutions.")
+                    print(f"Iteration {iteration}: no valid solutions. Global best = {self.best_cost:.3f}")
                 continue
 
             valid_ants_sorted = sorted(
@@ -162,8 +165,12 @@ class AcoSolver:
                 alpha3=self.alpha3,
             )
 
-            for ant in top_k:
-                self.deposit_pheromone_on_path(ant.path)
+            for rank, ant in enumerate(top_k):
+                weight = float(k - rank)
+                self.deposit_pheromone_on_path(ant.path, weight=weight) # Dynamic weights for top ants
+
+            if self.best_path is not None and self.elitist_weight > 0.0: # Elitist reinforcement for global best
+                self.deposit_pheromone_on_path(self.best_path, weight=self.elitist_weight)
 
             if verbose:
                 print(
