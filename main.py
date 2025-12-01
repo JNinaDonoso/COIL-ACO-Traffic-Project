@@ -7,15 +7,7 @@ def main():
     grid.update_edge((0, 0), (0, 1), traffic=0.8)
     grid.update_edge((3, 3), (3, 4), traffic=0.5)
 
-    interactive_aco_demo(
-        graph=grid,
-        heuristic="traffic",
-        num_ants=150,
-        num_iterations=200,
-        rho=0.3,
-        alpha=1.0,
-        beta=2.0,
-    )
+    interactive_aco_demo(graph=grid)
 
 if __name__ == "__main__":
     main()

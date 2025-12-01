@@ -1,11 +1,12 @@
 from typing import List, Dict, Tuple, Optional
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Slider, Button, RadioButtons
 from .graph import GridGraph, Node
 from .aco_solver import AcoSolver
 
-EdgeKey = Tuple[Node, Node]
 
+EdgeKey = Tuple[Node, Node]
 
 def plot_grid_and_path(
     graph: GridGraph,
@@ -327,19 +328,19 @@ def _draw_interactive_state(
 
 def interactive_aco_demo(
     graph: GridGraph,
-    heuristic: str = "traffic",
-    num_ants: int = 20,
-    num_iterations: int = 30,
-    rho: float = 0.3,
-    alpha: float = 1.0,
-    beta: float = 2.0,
+    initial_heuristic: str = "traffic",
+    initial_num_ants: int = 20,
+    initial_num_iterations: int = 30,
+    initial_rho: float = 0.3,
+    initial_alpha: float = 1.0,
+    initial_beta: float = 2.0,
 ) -> None:
     """
-    Simple GUI that allows selection of endpoints and waypoints
+    More complex interactive program
     """
 
     fig, ax = plt.subplots()
-    plt.subplots_adjust(right=0.8)
+    plt.subplots_adjust(left=0.07, right=0.68, bottom=0.25)
 
     state = {
         "start": None,          # type: Optional[Node]
@@ -349,6 +350,44 @@ def interactive_aco_demo(
         "last_animation": None
     }
 
+    params = {
+        "num_ants": initial_num_ants,
+        "num_iterations": initial_num_iterations,
+        "alpha": initial_alpha,
+        "beta": initial_beta,
+        "rho": initial_rho,
+        "heuristic": initial_heuristic,
+    }
+
+    # ====== SLIDERS ====== #
+    ax_ants = fig.add_axes([0.72, 0.55, 0.22, 0.03])
+    slider_ants = Slider(ax_ants, "Ants", 5, 300, valinit=params["num_ants"], valstep=1)
+
+    ax_iters = fig.add_axes([0.72, 0.50, 0.22, 0.03])
+    slider_iters = Slider(ax_iters, "Iters", 5, 500, valinit=params["num_iterations"], valstep=1)
+
+    ax_alpha = fig.add_axes([0.72, 0.45, 0.22, 0.03])
+    slider_alpha = Slider(ax_alpha, "alpha", 0.0, 5.0, valinit=params["alpha"])
+
+    ax_beta = fig.add_axes([0.72, 0.40, 0.22, 0.03])
+    slider_beta = Slider(ax_beta, "beta", 0.0, 5.0, valinit=params["beta"])
+
+    ax_rho = fig.add_axes([0.72, 0.35, 0.22, 0.03])
+    slider_rho = Slider(ax_rho, "rho", 0.0, 1.0, valinit=params["rho"])
+
+    # ====== RADIO BUTTONS ====== #
+    ax_radio = fig.add_axes([0.72, 0.65, 0.22, 0.12])
+    heuristics = ["distance", "traffic", "time"]
+
+    if params["heuristic"] not in heuristics:
+        params["heuristic"] = heuristics[0]
+    radio_heur = RadioButtons(ax_radio, heuristics, active=heuristics.index(params["heuristic"]))
+
+    # ====== RUN ====== #
+    ax_run = fig.add_axes([0.75, 0.26, 0.15, 0.06])
+    btn_run = Button(ax_run, "RUN")
+
+
     def redraw():
         _draw_interactive_state(
             ax=ax,
@@ -357,9 +396,36 @@ def interactive_aco_demo(
             end=state["end"],
             waypoints=sorted(state["waypoints"]),
             solver=state["solver"],
-            title_prefix="Interactive ACO (click to set start/end/waypoints, 'r' to run, 'c' to clear)",
+            title_prefix="Interactive ACO (click: start/end/waypoints | 'r' or button: run | 'c': clear)",
         )
         fig.canvas.draw_idle()
+
+
+    def update_ants(val):
+        params["num_ants"] = int(slider_ants.val)
+
+    def update_iters(val):
+        params["num_iterations"] = int(slider_iters.val)
+
+    def update_alpha(val):
+        params["alpha"] = float(slider_alpha.val)
+
+    def update_beta(val):
+        params["beta"] = float(slider_beta.val)
+
+    def update_rho(val):
+        params["rho"] = float(slider_rho.val)
+
+    def update_heur(label):
+        params["heuristic"] = str(label)
+
+    slider_ants.on_changed(update_ants)
+    slider_iters.on_changed(update_iters)
+    slider_alpha.on_changed(update_alpha)
+    slider_beta.on_changed(update_beta)
+    slider_rho.on_changed(update_rho)
+    radio_heur.on_clicked(update_heur)
+
 
     def on_click(event):
         if event.inaxes is not ax:
@@ -395,6 +461,38 @@ def interactive_aco_demo(
         state["solver"] = None
         redraw()
 
+    def run_aco():
+        if state["start"] is None or state["end"] is None:
+            print("Please set start and end before running ACO.")
+            return
+
+        print(
+            f"Running ACO"
+        )
+
+        solver = AcoSolver(
+            graph=graph,
+            start=state["start"],
+            waypoints=sorted(state["waypoints"]),
+            end=state["end"],
+            heuristic=params["heuristic"],
+            num_ants=params["num_ants"],
+            num_iterations=params["num_iterations"],
+            rho=params["rho"],
+            alpha=params["alpha"],
+            beta=params["beta"],
+        )
+        solver.run(verbose=False)
+        state["solver"] = solver
+
+        print(f"Best path: {solver.best_path}")
+        print(f"Best cost: {solver.best_cost:.3f}")
+
+        redraw()
+
+        anim = animate_solver(solver, interval=100, repeat=False)
+        state["last_animation"] = anim
+
     def on_key(event):
         if event.key == "c":
             state["start"] = None
@@ -403,41 +501,15 @@ def interactive_aco_demo(
             state["solver"] = None
             print("State cleared.")
             redraw()
-
         elif event.key == "r":
-            if state["start"] is None or state["end"] is None:
-                print("Please set start and end before running ACO.")
-                return
+            run_aco()
 
-            print(
-                f"Running ACO"
-            )
-
-            solver = AcoSolver(
-                graph=graph,
-                start=state["start"],
-                waypoints=sorted(state["waypoints"]),
-                end=state["end"],
-                heuristic=heuristic,
-                num_ants=num_ants,
-                num_iterations=num_iterations,
-                rho=rho,
-                alpha=alpha,
-                beta=beta,
-            )
-            solver.run(verbose=False)
-            state["solver"] = solver
-
-            print(f"Best path: {solver.best_path}")
-            print(f"Best cost: {solver.best_cost:.3f}")
-
-            redraw()
-
-            anim = animate_solver(solver, interval=400, repeat=True)
-            state["last_animation"] = anim
+    def on_run_button_clicked(event):
+        run_aco()
 
     cid_click = fig.canvas.mpl_connect("button_press_event", on_click)
     cid_key = fig.canvas.mpl_connect("key_press_event", on_key)
+    btn_run.on_clicked(on_run_button_clicked)
 
     redraw()
     plt.show()
@@ -454,9 +526,6 @@ def _draw_path_with_centered_arrows(
     head_width: float = 0.15,
     head_length: float = 0.15,
 ) -> None:
-    """
-    Draws a path with arrows
-    """
     if not path or len(path) < 2:
         return
 
@@ -467,10 +536,8 @@ def _draw_path_with_centered_arrows(
     for (x1, y1), (x2, y2) in zip(path[:-1], path[1:]):
         dx = x2 - x1
         dy = y2 - y1
-
         xm = x1 + 0.5 * dx
         ym = y1 + 0.5 * dy
-
         adx = 0.4 * dx
         ady = 0.4 * dy
 
