@@ -125,12 +125,6 @@ def _draw_state_on_axis(
 
     ax.clear()
 
-    max_tau = None
-    if pheromone:
-        max_tau = max(pheromone.values())
-        if max_tau <= 0:
-            max_tau = None
-
     drawn_edges = set()
 
     for u in graph.nodes():
@@ -148,12 +142,7 @@ def _draw_state_on_axis(
             else:
                 edge_color = "grey"
 
-            lw = 1.0
-            if pheromone and max_tau:
-                tau = pheromone.get((u, v), 0.0)
-                lw = 0.5 + 3.0 * (tau / max_tau) # Linear scaling for pheromone tracking
-
-            ax.plot([x1, x2], [y1, y2], linewidth=lw, color=edge_color, alpha=0.7)
+            ax.plot([x1, x2], [y1, y2], linewidth=2, color=edge_color, alpha=0.7)
             drawn_edges.add((u, v))
 
     xs = [node[0] for node in graph.nodes()]
@@ -257,12 +246,6 @@ def _draw_interactive_state(
     best_cost = solver.best_cost if solver is not None else None
     heuristic = solver.heuristic if solver is not None else None
 
-    max_tau = None
-    if pheromone:
-        max_tau = max(pheromone.values())
-        if max_tau <= 0:
-            max_tau = None
-
     drawn_edges = set()
 
     for u in graph.nodes():
@@ -280,12 +263,7 @@ def _draw_interactive_state(
             else:
                 edge_color = "grey"
 
-            lw = 1.0
-            if pheromone and max_tau:
-                tau = pheromone.get((u, v), 0.0)
-                lw = 0.5 + 3.0 * (tau / max_tau)
-
-            ax.plot([x1, x2], [y1, y2], linewidth=lw, color=edge_color, alpha=0.7)
+            ax.plot([x1, x2], [y1, y2], linewidth=2, color=edge_color, alpha=0.7)
             drawn_edges.add((u, v))
 
     xs = [node[0] for node in graph.nodes()]
@@ -328,9 +306,9 @@ def _draw_interactive_state(
 
 def interactive_aco_demo(
     graph: GridGraph,
-    initial_heuristic: str = "traffic",
-    initial_num_ants: int = 20,
-    initial_num_iterations: int = 30,
+    initial_heuristic: str = "distance",
+    initial_num_ants: int = 80,
+    initial_num_iterations: int = 150,
     initial_rho: float = 0.3,
     initial_alpha: float = 1.0,
     initial_beta: float = 2.0,
