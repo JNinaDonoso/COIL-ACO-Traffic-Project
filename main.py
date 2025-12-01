@@ -1,6 +1,6 @@
 from aco_traffic.graph import GridGraph
 from aco_traffic.aco_solver import AcoSolver
-from aco_traffic.visualization import plot_solver_result
+from aco_traffic.visualization import plot_solver_result, animate_solver
 
 
 def main():
@@ -40,7 +40,8 @@ def main():
     print("Best path found:", solver.best_path)
     print("Best cost:", solver.best_cost)
 
-    plot_solver_result(solver, title="ACO best route with pheromone levels")
+    plot_solver_result(solver, title="ACO Best Route")
+    animate_solver(solver, interval=200)
 
 
 if __name__ == "__main__":

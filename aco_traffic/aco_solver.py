@@ -43,6 +43,11 @@ class AcoSolver:
     best_path: Optional[List[Node]] = field(init=False, default=None)
     best_cost: float = field(init=False, default=float("inf"))
 
+    history_best_paths: List[Optional[List[Node]]] = field(init=False, default_factory=list)
+    history_best_costs: List[float] = field(init=False, default_factory=list)
+    history_pheromones: List[Dict[EdgeKey, float]] = field(init=False, default_factory=list)
+
+
     def __post_init__(self) -> None:
         self._initialize_pheromone()
 
@@ -120,6 +125,10 @@ class AcoSolver:
         """
         from .ant import AcoAnt  # imported here to avoid circular imports
 
+        self.history_best_paths.clear()
+        self.history_best_costs.clear()
+        self.history_pheromones.clear()
+
         for iteration in range(self.num_iterations):
             ants: List[AcoAnt] = []
 
@@ -171,6 +180,13 @@ class AcoSolver:
 
             if self.best_path is not None and self.elitist_weight > 0.0: # Elitist reinforcement for global best
                 self.deposit_pheromone_on_path(self.best_path, weight=self.elitist_weight)
+
+
+            self.history_pheromones.append(dict(self.pheromone))
+            self.history_best_paths.append(
+                list(self.best_path) if self.best_path is not None else None
+            )
+            self.history_best_costs.append(self.best_cost)
 
             if verbose:
                 print(
