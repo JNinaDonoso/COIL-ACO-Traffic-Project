@@ -3,9 +3,8 @@ from aco_traffic.visualization import interactive_aco_demo
 from pathlib import Path
 import json
 
-# Absolute path to your presets file
+#path to the presets file
 PRESETS_FILE = Path("/Users/sakshamkumar/Desktop/Classes/CS2104/collabProj/COIL-ACO-Traffic-Project/graphPresets.json")
-
 
 
 def load_preset_graph(preset_name: str) -> GridGraph:
@@ -39,7 +38,6 @@ def load_preset_graph(preset_name: str) -> GridGraph:
 
 
 def list_presets():
-    """List all available presets from the JSON file."""
     with open(PRESETS_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     return [p["name"] for p in data["presets"]]
