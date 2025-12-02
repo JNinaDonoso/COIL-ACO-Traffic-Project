@@ -1,0 +1,39 @@
+{
+  "presets": [
+    {
+      "name": "5x5_high_traffic",
+      "rows": 5,
+      "cols": 5,
+      "default_distance": 1.0,
+      "edges": [
+        { "from": [0, 0], "to": [0, 1], "traffic": 0.9, "distance": 2 },
+        { "from": [0, 1], "to": [0, 2], "traffic": 0.8 },
+        { "from": [1, 1], "to": [1, 2], "traffic": 0.95 },
+        { "from": [2, 2], "to": [2, 3], "traffic": 0.85 }
+      ]
+    },
+    {
+      "name": "10x10_medium_traffic",
+      "rows": 10,
+      "cols": 10,
+      "default_distance": 1.0,
+      "edges": [
+        { "from": [0, 0], "to": [0, 1], "traffic": 0.5 },
+        { "from": [3, 3], "to": [3, 4], "traffic": 0.6 },
+        { "from": [5, 5], "to": [5, 6], "traffic": 0.4 }
+      ]
+    },
+    {
+      "name": "15x15_very_high_traffic",
+      "rows": 15,
+      "cols": 15,
+      "default_distance": 1.0,
+      "edges": [
+        { "from": [0, 0], "to": [0, 1], "traffic": 0.95 },
+        { "from": [0, 1], "to": [0, 2], "traffic": 0.98 },
+        { "from": [7, 7], "to": [7, 8], "traffic": 0.99 },
+        { "from": [10, 10], "to": [10, 11], "traffic": 0.97 }
+      ]
+    }
+  ]
+}
