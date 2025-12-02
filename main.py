@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 
 #path to the presets file
-PRESETS_FILE = Path("/Users/sakshamkumar/Desktop/Classes/CS2104/collabProj/COIL-ACO-Traffic-Project/graphPresets.json")
+PRESETS_FILE = Path("graphPresets.json")
 
 
 def load_preset_graph(preset_name: str) -> GridGraph:
