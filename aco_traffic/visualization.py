@@ -309,6 +309,7 @@ def interactive_aco_demo(
     initial_heuristic: str = "distance",
     initial_num_ants: int = 80,
     initial_num_iterations: int = 150,
+    initial_max_steps: int = 100,
     initial_rho: float = 0.3,
     initial_alpha: float = 1.0,
     initial_beta: float = 2.0,
@@ -331,6 +332,7 @@ def interactive_aco_demo(
     params = {
         "num_ants": initial_num_ants,
         "num_iterations": initial_num_iterations,
+        "max_steps": initial_max_steps,
         "alpha": initial_alpha,
         "beta": initial_beta,
         "rho": initial_rho,
@@ -339,18 +341,21 @@ def interactive_aco_demo(
 
     # ====== SLIDERS ====== #
     ax_ants = fig.add_axes([0.72, 0.55, 0.22, 0.03])
-    slider_ants = Slider(ax_ants, "Ants", 5, 300, valinit=params["num_ants"], valstep=1)
+    slider_ants = Slider(ax_ants, "Ants", 5, 500, valinit=params["num_ants"], valstep=1)
 
     ax_iters = fig.add_axes([0.72, 0.50, 0.22, 0.03])
-    slider_iters = Slider(ax_iters, "Iters", 5, 500, valinit=params["num_iterations"], valstep=1)
+    slider_iters = Slider(ax_iters, "Iters", 5, 2000, valinit=params["num_iterations"], valstep=1)
 
-    ax_alpha = fig.add_axes([0.72, 0.45, 0.22, 0.03])
+    ax_steps = fig.add_axes([0.72, 0.45, 0.22, 0.03])
+    slider_steps = Slider(ax_steps, "Steps", 50, 1000, valinit=params["max_steps"], valstep=1)
+
+    ax_alpha = fig.add_axes([0.72, 0.40, 0.22, 0.03])
     slider_alpha = Slider(ax_alpha, "alpha", 0.0, 5.0, valinit=params["alpha"])
 
-    ax_beta = fig.add_axes([0.72, 0.40, 0.22, 0.03])
+    ax_beta = fig.add_axes([0.72, 0.35, 0.22, 0.03])
     slider_beta = Slider(ax_beta, "beta", 0.0, 5.0, valinit=params["beta"])
 
-    ax_rho = fig.add_axes([0.72, 0.35, 0.22, 0.03])
+    ax_rho = fig.add_axes([0.72, 0.30, 0.22, 0.03])
     slider_rho = Slider(ax_rho, "rho", 0.0, 1.0, valinit=params["rho"])
 
     # ====== RADIO BUTTONS ====== #
@@ -362,7 +367,7 @@ def interactive_aco_demo(
     radio_heur = RadioButtons(ax_radio, heuristics, active=heuristics.index(params["heuristic"]))
 
     # ====== RUN ====== #
-    ax_run = fig.add_axes([0.75, 0.26, 0.15, 0.06])
+    ax_run = fig.add_axes([0.75, 0.20, 0.15, 0.06])
     btn_run = Button(ax_run, "RUN")
 
 
@@ -385,6 +390,9 @@ def interactive_aco_demo(
     def update_iters(val):
         params["num_iterations"] = int(slider_iters.val)
 
+    def update_steps(val):
+        params["max_steps"] = int(slider_steps.val)
+
     def update_alpha(val):
         params["alpha"] = float(slider_alpha.val)
 
@@ -399,6 +407,7 @@ def interactive_aco_demo(
 
     slider_ants.on_changed(update_ants)
     slider_iters.on_changed(update_iters)
+    slider_steps.on_changed(update_steps)
     slider_alpha.on_changed(update_alpha)
     slider_beta.on_changed(update_beta)
     slider_rho.on_changed(update_rho)

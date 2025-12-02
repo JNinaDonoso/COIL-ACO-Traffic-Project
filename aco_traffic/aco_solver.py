@@ -28,7 +28,7 @@ class AcoSolver:
     beta: float = 2.0                # heuristic weight
     rho: float = 0.5                 # evaporation rate
     Q: float = 1.0                   # pheromone deposit
-    initial_pheromone: float = 1.0   # we can later take into account closed streets without initial pheromone
+    initial_pheromone: float = 1.0
     max_steps_per_ant: int = 100
 
     # ====== Cost Params ====== #
