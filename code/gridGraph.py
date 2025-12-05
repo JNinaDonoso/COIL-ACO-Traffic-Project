@@ -2,7 +2,8 @@ import json
 from pathlib import Path
 from aco_traffic.graph import GridGraph
 
-PRESETS_FILE = r"graphPresets.json"
+# Path to the presets file (relative to project root)
+PRESETS_FILE = Path(__file__).parent.parent / "data" / "graphPresets.json"
 
 
 def load_preset_graph(preset_name: str, presets_path: Path = PRESETS_FILE) -> GridGraph:
