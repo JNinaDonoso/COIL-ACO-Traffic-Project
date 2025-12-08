@@ -27,8 +27,6 @@ COIL-ACO-Traffic-Project/
 │   └── gridGraph.py         # Grid graph preset loader
 ├── data/                    # Configuration and input data
 │   └── graphPresets.json    # Predefined graph configurations
-├── tests/                   # Test scripts
-├── docs/                    # Documentation and screenshots
 ├── report/                  # Final report document
 └── README.md                # This file
 ```
